@@ -4,6 +4,8 @@ import tensorflow_hub as hub
 import tensorflow_datasets as tfds
 import matplotlib.pyplot as plt
 from numpy import genfromtxt
+from keras.preprocessing.text import Tokenizer
+from keras_preprocessing.sequence import pad_sequences
 import pandas as pd
 
 
@@ -41,7 +43,45 @@ def loading_data():
     return train_examples, train_labels, test_examples, test_labels
 
 
+def tokenizer_func(train_examples, test_examples):
+    tokenizer_train = Tokenizer(num_words=100, oov_token="<OOV>")
+    tokenizer_test = Tokenizer(num_words=100, oov_token="<OOV>")
+    tokenizer_train.fit_on_texts(train_examples)
+    tokenizer_test.fit_on_texts(test_examples)
+
+    word_index_train = tokenizer_train.word_index
+    word_index_test = tokenizer_test.word_index
+
+    sequences_train = tokenizer_train.texts_to_sequences(train_examples)
+    sequences_test = tokenizer_test.texts_to_sequences(test_examples)
+
+    padded_train = pad_sequences(sequences_train, padding='post')
+    padded_test = pad_sequences(sequences_test, padding='post')
+
+    return padded_train, padded_test
+
+def model_using_padded(padded_train, padded_test, train_labels, test_label):
+    embedding_dim = 16
+
+    # creating a model for sentiment analysis
+    model = tf.keras.Sequential([
+        # addinging an Embedding layer for Neural Network to learn the vectors
+        tf.keras.layers.Embedding(1000, embedding_dim, input_length=100),
+        # Global Average pooling is similar to adding up vectors in this case
+        tf.keras.layers.GlobalAveragePooling1D(),
+        tf.keras.layers.Dense(24, activation='relu'),
+        tf.keras.layers.Dense(1, activation='sigmoid')
+    ])
+
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+    num_epochs = 10
+
+    history = model.fit(padded_train, train_labels, epochs=num_epochs,
+                        validation_data=(padded_test, test_label))
+
 # Setup Model and training + result. Might be changed in a near future
+"""
 def model_usage(train_examples, train_labels, test_examples, test_labels):
     model = "https://tfhub.dev/google/nnlm-en-dim50/2"
     hub_layer = hub.KerasLayer(model, input_shape=[], dtype=tf.string, trainable=True)
@@ -80,7 +120,7 @@ def model_usage(train_examples, train_labels, test_examples, test_labels):
     epochs = range(1, len(acc) + 1)
 
     return epochs, loss, val_loss, acc, val_acc
-
+"""
 
 # Use only for a plot_lib schema. Otherwise, use tensorboard
 def plot_lib_print(epochs, loss, val_loss, acc, val_acc):
@@ -110,5 +150,7 @@ def plot_lib_print(epochs, loss, val_loss, acc, val_acc):
 if __name__ == '__main__':
     setup()
     train_examples, train_labels, test_examples, test_labels = loading_data()
-    epochs, loss, val_loss, acc, val_acc = model_usage(train_examples, train_labels, test_examples, test_labels)
-    plot_lib_print(epochs, loss, val_loss, acc, val_acc)
+    padded_train, padded_test = tokenizer_func(train_examples, test_examples)
+    model_using_padded(padded_train, padded_test, train_labels, test_labels)
+    # epochs, loss, val_loss, acc, val_acc = model_usage(train_examples, train_labels, test_examples, test_labels)
+    # plot_lib_print(epochs, loss, val_loss, acc, val_acc)
