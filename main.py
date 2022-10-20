@@ -3,6 +3,8 @@ import tensorflow as tf
 import tensorflow_hub as hub
 import tensorflow_datasets as tfds
 import matplotlib.pyplot as plt
+from numpy import genfromtxt
+import pandas as pd
 
 
 # Just to test the setup
@@ -15,15 +17,28 @@ def setup():
 
 # Loading the training and testing data
 def loading_data():
-    train_data, test_data = tfds.load(name="imdb_reviews", split=["train", "test"],
-                                      batch_size=-1, as_supervised=True)
-    train_examples, train_labels = tfds.as_numpy(train_data)
-    test_examples, test_labels = tfds.as_numpy(test_data)
+    # train_data = genfromtxt('data/goodreads_train.csv', delimiter=',', skip_header=1)
+    # train_data, test_data = tfds.load(name="imdb_reviews", split=["train", "test"],
+    #                                   batch_size=-1, as_supervised=True)
+    # test_data = genfromtxt('data/goodreads_test.csv', delimiter=',', skip_header=1)
+
+    data = pd.read_csv('data/goodreads_train.csv', sep=',', header=0)
+    # test_data = pd.read_csv('data/goodreads_test.csv', sep=',', header=0)
+    data_rating = data["rating"]
+    data_review = data["review_text"]
+
+    train_labels = data_rating.iloc[:int(len(data_rating)/2)]
+    train_examples = data_review.iloc[int(len(data_review)/2):]
+    test_examples = data_review.iloc[:int(len(data_review)/2)]
+    test_labels = data_rating.iloc[int(len(data_rating)/2):]
+
+    # train_examples, train_labels = tfds.as_numpy(train_data)
+    # test_examples, test_labels = tfds.as_numpy(test_data)
 
     print("Training entries: {}, test entries: {}".format(len(train_examples), len(test_examples)))
-    print(train_examples[:10])
-    print(train_labels[:10])
-    return train_data, train_examples, train_labels, test_data, test_examples, test_labels
+    print(train_examples.values)
+    print(train_labels.values)
+    return train_examples, train_labels, test_examples, test_labels
 
 
 # Setup Model and training + result. Might be changed in a near future
@@ -94,6 +109,6 @@ def plot_lib_print(epochs, loss, val_loss, acc, val_acc):
 
 if __name__ == '__main__':
     setup()
-    train_data, train_examples, train_labels, test_data, test_examples, test_labels = loading_data()
+    train_examples, train_labels, test_examples, test_labels = loading_data()
     epochs, loss, val_loss, acc, val_acc = model_usage(train_examples, train_labels, test_examples, test_labels)
     plot_lib_print(epochs, loss, val_loss, acc, val_acc)
