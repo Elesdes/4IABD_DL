@@ -60,6 +60,7 @@ def tokenizer_func(train_examples, test_examples):
 
     return padded_train, padded_test
 
+
 def model_using_padded(padded_train, padded_test, train_labels, test_label):
     embedding_dim = 16
 
