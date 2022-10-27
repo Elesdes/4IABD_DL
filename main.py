@@ -1,4 +1,5 @@
 import numpy as np
+import json
 import tensorflow as tf
 import tensorflow_hub as hub
 import tensorflow_datasets as tfds
@@ -8,6 +9,9 @@ from keras.preprocessing.text import Tokenizer
 from keras_preprocessing.sequence import pad_sequences
 import pandas as pd
 
+MAX_SIZE = 3000
+NUM_WORDS = 3000
+CHUNKSIZE = 100000
 
 # Just to test the setup
 def setup():
@@ -17,24 +21,8 @@ def setup():
     print("GPU is", "available" if tf.config.list_physical_devices('GPU') else "NOT AVAILABLE")
 
 
-# Loading the training and testing data
-def loading_data():
-    data = pd.read_csv('kaggle/input/goodreads_train.csv', sep=',', header=0)
-    data_rating = data["rating"]
-    data_review = data["review_text"]
-    """
-    train_labels = data_rating.iloc[:int(len(data_rating)/2)]
-    train_examples = data_review.iloc[int(len(data_review)/2):]
-    test_examples = data_review.iloc[:int(len(data_review)/2)]
-    test_labels = data_rating.iloc[int(len(data_rating)/2):]
-    """
-
-    print("Training entries: {}, test entries: {}".format(len(data_rating), len(data_review)))
-    return data_rating, data_review
-
-
 def tokenizer_func(data_rating, data_review):
-    tokenizer = Tokenizer(num_words=100, oov_token="<OOV>")
+    tokenizer = Tokenizer(num_words=NUM_WORDS, oov_token="<OOV>")
     tokenizer.fit_on_texts(data_review)
 
     word_index = tokenizer.word_index
@@ -47,10 +35,10 @@ def tokenizer_func(data_rating, data_review):
     sequences_train = tokenizer.texts_to_sequences(train_examples)
     sequences_test = tokenizer.texts_to_sequences(test_examples)
 
-    padded_train = pad_sequences(sequences_train, padding='post', truncating='post')
-    padded_test = pad_sequences(sequences_test, padding='post', truncating='post')
+    padded_train = pad_sequences(sequences_train, padding='post', truncating='post', maxlen=MAX_SIZE)
+    padded_test = pad_sequences(sequences_test, padding='post', truncating='post', maxlen=MAX_SIZE)
 
-    return padded_train, padded_test, train_labels, test_labels
+    return np.array(padded_train), np.array(padded_test), np.array(train_labels), np.array(test_labels)
 
 
 def model_using_padded(padded_train, padded_test, train_labels, test_label):
@@ -59,7 +47,7 @@ def model_using_padded(padded_train, padded_test, train_labels, test_label):
     # creating a model for sentiment analysis
     model = tf.keras.Sequential([
         # addinging an Embedding layer for Neural Network to learn the vectors
-        tf.keras.layers.Embedding(1000, embedding_dim, input_length=100),
+        tf.keras.layers.Embedding(NUM_WORDS, embedding_dim, input_length=MAX_SIZE),
         # Global Average pooling is similar to adding up vectors in this case
         tf.keras.layers.GlobalAveragePooling1D(),
         tf.keras.layers.Dense(24, activation='relu'),
@@ -101,8 +89,71 @@ def plot_lib_print(epochs, loss, val_loss, acc, val_acc):
 
 if __name__ == '__main__':
     setup()
-    data_rating, data_review = loading_data()
-    padded_train, padded_test, train_labels, test_labels = tokenizer_func(data_rating, data_review)
-    model_using_padded(padded_train, padded_test, train_labels, test_labels)
-    # epochs, loss, val_loss, acc, val_acc = model_usage(train_examples, train_labels, test_examples, test_labels)
-    # plot_lib_print(epochs, loss, val_loss, acc, val_acc)
+    data = pd.read_json('kaggle/input/sarcasm.json', lines=True)
+
+    # iterating through the json data and loding
+    # the requisite values into our python lists
+    sentences = data['headline']
+    labels = data['is_sarcastic']
+    urls = data['article_link']
+    training_size = 20000
+
+    training_sentences = sentences[0:training_size]
+    testing_sentences = sentences[training_size:]
+
+    training_labels = labels[0:training_size]
+    testing_labels = labels[training_size:]
+    tokenizer = Tokenizer(num_words=NUM_WORDS, oov_token="<OOV>")
+    # fitting tokenizer only to training set
+    tokenizer.fit_on_texts(training_sentences)
+
+    word_index = tokenizer.word_index
+
+    # creating training sequences and padding them
+    traning_sequences = tokenizer.texts_to_sequences(training_sentences)
+    training_padded = pad_sequences(traning_sequences, maxlen=MAX_SIZE,
+                                    padding='post',
+                                    truncating='post',
+                                    )
+
+    # creating  testing sequences and padding them using same tokenizer
+    testing_sequences = tokenizer.texts_to_sequences(testing_sentences)
+    testing_padded = pad_sequences(testing_sequences, maxlen=MAX_SIZE,
+                                   padding='post',
+                                   truncating='post',
+                                   )
+
+    import numpy as np
+
+    # converting all variables to numpy arrays, to be able to work with tf version 2
+    training_padded = np.array(training_padded)
+    training_labels = np.array(training_labels)
+    testing_padded = np.array(testing_padded)
+    testing_labels = np.array(testing_labels)
+    embedding_dim = 16
+
+    # creating a model for sentiment analysis
+    model = tf.keras.Sequential([
+        # addinging an Embedding layer for Neural Network to learn the vectors
+        tf.keras.layers.Embedding(NUM_WORDS, embedding_dim, input_length=MAX_SIZE),
+        # Global Average pooling is similar to adding up vectors in this case
+        tf.keras.layers.GlobalAveragePooling1D(),
+        tf.keras.layers.Dense(24, activation='relu'),
+        tf.keras.layers.Dense(1, activation='sigmoid')
+    ])
+
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+    num_epochs = 10
+
+    history = model.fit(training_padded, training_labels, epochs=num_epochs,
+                        validation_data=(testing_padded, testing_labels))
+    """
+    for chunk in pd.read_csv('kaggle/input/goodreads_train.csv', sep=',', header=0, chunksize=CHUNKSIZE):
+        data_rating = chunk["rating"]
+        data_review = chunk["review_text"]
+        padded_train, padded_test, train_labels, test_labels = tokenizer_func(data_rating, data_review)
+        model_using_padded(padded_train, padded_test, train_labels, test_labels)
+        # epochs, loss, val_loss, acc, val_acc = model_usage(train_examples, train_labels, test_examples, test_labels)
+        # plot_lib_print(epochs, loss, val_loss, acc, val_acc)
+    """
