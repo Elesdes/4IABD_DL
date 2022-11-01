@@ -9,9 +9,12 @@ from keras.preprocessing.text import Tokenizer
 from keras_preprocessing.sequence import pad_sequences
 import pandas as pd
 
-MAX_SIZE = 3000
-NUM_WORDS = 3000
+MAX_SIZE = 100
+NUM_WORDS = 10000
 CHUNKSIZE = 100000
+NUM_EPOCHS = 10
+EMBEDDING_DIM = 16
+
 
 # Just to test the setup
 def setup():
@@ -42,57 +45,12 @@ def tokenizer_func(data_rating, data_review):
 
 
 def model_using_padded(padded_train, padded_test, train_labels, test_label):
-    embedding_dim = 16
-
-    # creating a model for sentiment analysis
-    model = tf.keras.Sequential([
-        # addinging an Embedding layer for Neural Network to learn the vectors
-        tf.keras.layers.Embedding(NUM_WORDS, embedding_dim, input_length=MAX_SIZE),
-        # Global Average pooling is similar to adding up vectors in this case
-        tf.keras.layers.GlobalAveragePooling1D(),
-        tf.keras.layers.Dense(24, activation='relu'),
-        tf.keras.layers.Dense(1, activation='sigmoid')
-    ])
-
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-    num_epochs = 10
-
-    history = model.fit(padded_train, train_labels, epochs=num_epochs,
-                        validation_data=(padded_test, test_label))
+    pass
 
 
-# Use only for a plot_lib schema. Otherwise, use tensorboard
-def plot_lib_print(epochs, loss, val_loss, acc, val_acc):
-    # "bo" is for "blue dot"
-    plt.plot(epochs, loss, 'bo', label='Training loss')
-    # b is for "solid blue line"
-    plt.plot(epochs, val_loss, 'b', label='Validation loss')
-    plt.title('Training and validation loss')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend()
-
-    plt.show()
-
-    plt.clf()  # clear figure
-
-    plt.plot(epochs, acc, 'bo', label='Training acc')
-    plt.plot(epochs, val_acc, 'b', label='Validation acc')
-    plt.title('Training and validation accuracy')
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy')
-    plt.legend()
-
-    plt.show()
-
-
-if __name__ == '__main__':
-    setup()
+def define_sarcasm():
     data = pd.read_json('kaggle/input/sarcasm.json', lines=True)
-
-    # iterating through the json data and loding
-    # the requisite values into our python lists
+    # iterating through the json data and loading the requisite values into our python lists
     sentences = data['headline']
     labels = data['is_sarcastic']
     urls = data['article_link']
@@ -123,19 +81,17 @@ if __name__ == '__main__':
                                    truncating='post',
                                    )
 
-    import numpy as np
-
     # converting all variables to numpy arrays, to be able to work with tf version 2
     training_padded = np.array(training_padded)
     training_labels = np.array(training_labels)
     testing_padded = np.array(testing_padded)
     testing_labels = np.array(testing_labels)
-    embedding_dim = 16
+
 
     # creating a model for sentiment analysis
     model = tf.keras.Sequential([
         # addinging an Embedding layer for Neural Network to learn the vectors
-        tf.keras.layers.Embedding(NUM_WORDS, embedding_dim, input_length=MAX_SIZE),
+        tf.keras.layers.Embedding(NUM_WORDS, EMBEDDING_DIM, input_length=MAX_SIZE),
         # Global Average pooling is similar to adding up vectors in this case
         tf.keras.layers.GlobalAveragePooling1D(),
         tf.keras.layers.Dense(24, activation='relu'),
@@ -144,16 +100,46 @@ if __name__ == '__main__':
 
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-    num_epochs = 10
-
-    history = model.fit(training_padded, training_labels, epochs=num_epochs,
+    history = model.fit(training_padded, training_labels, epochs=NUM_EPOCHS,
                         validation_data=(testing_padded, testing_labels))
-    """
+
+    return model
+
+
+# Use only for a plot_lib schema. Otherwise, use tensorboard
+def plot_lib_print(epochs, loss, val_loss, acc, val_acc):
+    # "bo" is for "blue dot"
+    plt.plot(epochs, loss, 'bo', label='Training loss')
+    # b is for "solid blue line"
+    plt.plot(epochs, val_loss, 'b', label='Validation loss')
+    plt.title('Training and validation loss')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.legend()
+
+    plt.show()
+
+    plt.clf()  # clear figure
+
+    plt.plot(epochs, acc, 'bo', label='Training acc')
+    plt.plot(epochs, val_acc, 'b', label='Validation acc')
+    plt.title('Training and validation accuracy')
+    plt.xlabel('Epochs')
+    plt.ylabel('Accuracy')
+    plt.legend()
+
+    plt.show()
+
+
+if __name__ == '__main__':
+    setup()
+    sarcasm_model = define_sarcasm()
+
     for chunk in pd.read_csv('kaggle/input/goodreads_train.csv', sep=',', header=0, chunksize=CHUNKSIZE):
         data_rating = chunk["rating"]
         data_review = chunk["review_text"]
         padded_train, padded_test, train_labels, test_labels = tokenizer_func(data_rating, data_review)
-        model_using_padded(padded_train, padded_test, train_labels, test_labels)
+        print(sarcasm_model.predict(padded_train))
+        # model_using_padded(padded_train, padded_test, train_labels, test_labels)
         # epochs, loss, val_loss, acc, val_acc = model_usage(train_examples, train_labels, test_examples, test_labels)
         # plot_lib_print(epochs, loss, val_loss, acc, val_acc)
-    """
