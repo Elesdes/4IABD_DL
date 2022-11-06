@@ -106,31 +106,6 @@ def define_sarcasm():
     return model
 
 
-# Use only for a plot_lib schema. Otherwise, use tensorboard
-def plot_lib_print(epochs, loss, val_loss, acc, val_acc):
-    # "bo" is for "blue dot"
-    plt.plot(epochs, loss, 'bo', label='Training loss')
-    # b is for "solid blue line"
-    plt.plot(epochs, val_loss, 'b', label='Validation loss')
-    plt.title('Training and validation loss')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.legend()
-
-    plt.show()
-
-    plt.clf()  # clear figure
-
-    plt.plot(epochs, acc, 'bo', label='Training acc')
-    plt.plot(epochs, val_acc, 'b', label='Validation acc')
-    plt.title('Training and validation accuracy')
-    plt.xlabel('Epochs')
-    plt.ylabel('Accuracy')
-    plt.legend()
-
-    plt.show()
-
-
 if __name__ == '__main__':
     setup()
     sarcasm_model = define_sarcasm()
@@ -139,7 +114,9 @@ if __name__ == '__main__':
         data_rating = chunk["rating"]
         data_review = chunk["review_text"]
         padded_train, padded_test, train_labels, test_labels = tokenizer_func(data_rating, data_review)
-        print(sarcasm_model.predict(padded_train))
-        # model_using_padded(padded_train, padded_test, train_labels, test_labels)
-        # epochs, loss, val_loss, acc, val_acc = model_usage(train_examples, train_labels, test_examples, test_labels)
-        # plot_lib_print(epochs, loss, val_loss, acc, val_acc)
+        sarcasm_prediction = sarcasm_model.predict(padded_train)
+        sarcasm_df = pd.DataFrame(sarcasm_prediction, columns=["predict"])
+        # TODO: this line can be use to take the predicted sarcasm score of a sentence.
+        # for temporarity in sarcasm_df["predict"]:
+
+        # temp = sarcasm_df.loc[2, "predict"]
