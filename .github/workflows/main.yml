@@ -18,17 +18,17 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v2
       # Runs a single command using the runners shell
       - name: Upload datasets
-        uses: elesdes/DeepLearning4IABD@v3 # This is the action
+        uses: Elesdes/DeepLearning4IABD@v3 # This is the action
         env:
           # Do not leak your credentials.
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
 
         with:
-          id:  "elesdes/my-new-dataset"
+          id:  "Elesdes/my-new-dataset"
           title: "Testing github actions for upload datasets"
           subtitle: "Test"
           description: "## Example of dataset syncronized by github actions"
