@@ -27,5 +27,5 @@ jobs:
           language: python
           kernel_type: notebook
           # Do not share high-scoring kernels.
-          is_private: true
+          is_private: false
           competition_sources: "goodreads-books-reviews-290312"
