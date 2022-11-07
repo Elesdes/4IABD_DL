@@ -1,13 +1,9 @@
 import numpy as np
-import json
+import pandas as pd
 import tensorflow as tf
 import tensorflow_hub as hub
-import tensorflow_datasets as tfds
-import matplotlib.pyplot as plt
-from numpy import genfromtxt
 from keras.preprocessing.text import Tokenizer
 from keras_preprocessing.sequence import pad_sequences
-import pandas as pd
 
 MAX_SIZE = 100
 NUM_WORDS = 10000
@@ -86,7 +82,6 @@ def define_sarcasm():
     training_labels = np.array(training_labels)
     testing_padded = np.array(testing_padded)
     testing_labels = np.array(testing_labels)
-
 
     # creating a model for sentiment analysis
     model = tf.keras.Sequential([

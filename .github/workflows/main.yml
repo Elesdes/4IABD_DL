@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v2
       # Runs a single command using the runners shell
       - name: Upload datasets
-        uses: elesdes/goodreads-books-reviews-290312@v3 # This is the action
+        uses: elesdes/DeepLearning4IABD@v3 # This is the action
         env:
           # Do not leak your credentials.
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
