@@ -13,18 +13,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Kaggle kernel actions
-        uses: Joel-hanson/kaggle-kernel-actions@V1
+      - name: Push kaggle dataset
+        uses: jaimevalero/push-kaggle-dataset@v3
         env:
           # Do not leak your credentials.
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         with:
-          kaggle_make_new_kernel: true
-          kaggle_metadata_path: kernel-metadata.json
-          kernel_id: ${{ secrets.KAGGLE_USERNAME }}/${{ github.sha }}
-          # id: ${{ secrets.KAGGLE_USERNAME }}/${{ github.sha }}
-          # title: ${{ github.sha }}
+          id: ${{ secrets.KAGGLE_USERNAME }}/${{ github.sha }}
+          title: ${{ github.sha }}
           code_file: ./notebook.ipynb
           language: python
           kernel_type: notebook
