@@ -20,4 +20,4 @@ jobs:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         with:
-          metadata_file: kernel-metadata.json
+          metadata_file: ./kernel-metadata.json
