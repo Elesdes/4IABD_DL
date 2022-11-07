@@ -20,11 +20,4 @@ jobs:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         with:
-          id: ${ secrets.KAGGLE_USERNAME }/${ github.sha }
-          title: ${ github.sha }
-          code_file: ./notebook.ipynb
-          language: python
-          kernel_type: notebook
-          # Do not share high-scoring kernels.
-          is_private: true
-          # competition_sources: "goodreads-books-reviews-290312"
+          metadata_file: kernel-metadata.json
