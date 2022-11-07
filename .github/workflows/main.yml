@@ -13,8 +13,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Push kaggle dataset
-        uses: jaimevalero/push-kaggle-dataset@v3
+      - name: Push Kaggle Kernel
+        uses: harupy/push-kaggle-kernel@v1.0.0
         env:
           # Do not leak your credentials.
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
@@ -22,9 +22,9 @@ jobs:
         with:
           id: ${{ secrets.KAGGLE_USERNAME }}/${{ github.sha }}
           title: ${{ github.sha }}
-          files: ./notebook.ipynb
-          # language: python
-          # kernel_type: notebook
+          code_file: ./notebook.ipynb
+          language: python
+          kernel_type: notebook
           # Do not share high-scoring kernels.
-          is_public: false
+          is_private: true
           # competition_sources: "goodreads-books-reviews-290312"
