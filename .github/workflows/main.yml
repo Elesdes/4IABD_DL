@@ -20,6 +20,7 @@ jobs:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
         with:
+          # id: ${{ secrets.KAGGLE_USERNAME }}/${{ github.sha }}
           title: ${{ github.sha }}
           code_file: ./notebook.ipynb
           language: python
