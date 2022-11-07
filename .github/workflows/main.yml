@@ -28,3 +28,4 @@ jobs:
           kernel_type: notebook
           # Do not share high-scoring kernels.
           is_private: true
+          competition_sources: "goodreads-books-reviews-290312"
