@@ -1,0 +1,31 @@
+name: Upload
+
+on:
+  push:
+    branches:
+      - [ master, dev ]
+
+jobs:
+  upload:
+    name: Upload
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Create a toy python script
+        run: echo "print('hello world')"
+
+      - uses: Elesdes/DeepLearning4IABD@master
+        env:
+          # Do not leak your credentials.
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        with:
+          id: ${{ secrets.KAGGLE_USERNAME }}/${{ github.sha }}
+          title: ${{ github.sha }}
+          code_file: ./notebook.ipynb
+          language: python
+          kernel_type: notebook
+          # Do not share high-scoring kernels.
+          is_private: true
+          competition_sources: ""
