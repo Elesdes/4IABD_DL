@@ -25,7 +25,7 @@ def run_shell(command, verbose=True):
     stdout, stderr = p.communicate()
 
     stdout = stdout.decode("utf-8")
-    stderr = stderr.decode("utf-8")  # stderr contains warnings.
+    stderr = stderr.decode("utf-8")  # stderr contains warnings
 
     if p.returncode != os.EX_OK:
         print("Return code:", p.returncode)
@@ -53,7 +53,7 @@ def is_comment(x):
 
 def get_action_input(name):
     # NOTE: When `default` is not given in `action.yml`,
-    # action input value will be "" (empty string).
+    # action input value will be "" (empty string)
     return os.getenv(f"INPUT_{name.upper()}")
 
 
@@ -109,23 +109,23 @@ def main():
     file_name = os.path.basename(code_file)
 
     if use_meta:
-        # `code_file` is a relative path from the direcotry where `meta_file` exists.
+        # `code_file` is a relative path from the directory where `meta_file` exists
         meta_dir = os.path.dirname(meta_file)
         code_file = os.path.join(meta_dir, file_name)
     else:
         meta["code_file"] = file_name
 
-    # Create a temporary directory to store metadata and kernel.
+    # Create a temporary directory to store metadata and kernel
     with tempfile.TemporaryDirectory() as tmpdir:
         # Save the kernel metadata.
         to_json(meta, os.path.join(tmpdir, "kernel-metadata.json"))
 
-        # Copy the target kernel to `tmpdir`.
+        # Copy the target kernel to `tmpdir`
         dst = os.path.join(tmpdir, file_name)
         shutil.copyfile(code_file, dst)
 
         # Push the kernel to Kaggle.
-        run_shell(f"kaggle kernels push -p {tmpdir}")
+        run_shell(f"kaggle kernels push")
         run_shell(f'kaggle kernels status {meta["id"]}')
 
 
