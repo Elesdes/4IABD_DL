@@ -6,6 +6,8 @@ import sys
 import tempfile
 from distutils.util import strtobool
 
+KAGGLE_DIR_NAME = "notebook-deep-learning"
+
 
 def read_json(path):
     with open(path) as f:
@@ -115,18 +117,9 @@ def main():
     else:
         meta["code_file"] = file_name
 
-    # Create a temporary directory to store metadata and kernel
-    with tempfile.TemporaryDirectory() as tmpdir:
-        # Save the kernel metadata.
-        to_json(meta, os.path.join(tmpdir, "kernel-metadata.json"))
-
-        # Copy the target kernel to `tmpdir`
-        dst = os.path.join(tmpdir, file_name)
-        shutil.copyfile(code_file, dst)
-
-        # Push the kernel to Kaggle.
-        run_shell(f"kaggle kernels push")
-        run_shell(f'kaggle kernels status {meta["id"]}')
+    # Push the kernel to Kaggle.
+    run_shell(f"kaggle kernels push")
+    run_shell(f'kaggle kernels status {KAGGLE_DIR_NAME}')
 
 
 if __name__ == "__main__":
