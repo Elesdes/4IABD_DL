@@ -18,9 +18,10 @@ jobs:
         env:
           KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+          KAGGLE_DIR_NAME: ${{ secrets.KAGGLE_DIR_NAME }}
         with:
-          id: ${{ secrets.KAGGLE_USERNAME }}/${{ github.sha }}
-          title: ${{ github.sha }}
+          id: ${{ secrets.KAGGLE_USERNAME }}/${{ secrets.KAGGLE_DIR_NAME }}
+          title: ${{ secrets.KAGGLE_DIR_NAME }}
           code_file: ./notebook.ipynb
           language: python
           kernel_type: notebook
