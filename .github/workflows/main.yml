@@ -20,8 +20,8 @@ jobs:
           KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
           KAGGLE_DIR_NAME: ${{ secrets.KAGGLE_DIR_NAME }}
         with:
-          id: ${{ secrets.KAGGLE_USERNAME }}/${{ secrets.KAGGLE_DIR_NAME }}
-          title: ${{ secrets.KAGGLE_DIR_NAME }}
+          id: ${{ secrets.KAGGLE_USERNAME }}/notebook-deep-learning
+          title: notebook-deep-learning
           code_file: ./notebook.ipynb
           language: python
           kernel_type: notebook
