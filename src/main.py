@@ -10,6 +10,8 @@ NUM_WORDS = 10000
 CHUNKSIZE = 100000
 NUM_EPOCHS = 10
 EMBEDDING_DIM = 16
+EPOCHS = 250
+BATCH_SIZE = 512
 
 
 # Just to test the setup
@@ -40,8 +42,20 @@ def tokenizer_func(data_rating, data_review):
     return np.array(padded_train), np.array(padded_test), np.array(train_labels), np.array(test_labels)
 
 
-def model_using_padded(padded_train, padded_test, train_labels, test_label):
-    pass
+def model_start(padded_train, padded_test, train_labels, test_labels):
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.Dense(42, activation=tf.keras.activations.tanh))
+    model.add(tf.keras.layers.Dense(32, activation=tf.keras.activations.tanh))
+    model.add(tf.keras.layers.Dense(16, activation=tf.keras.activations.tanh))
+    model.add(tf.keras.layers.Dense(10, activation=tf.keras.activations.sigmoid))
+
+    model.compile(optimizer=tf.keras.optimizers.SGD(0.1, momentum=0.9),
+                  loss=tf.keras.losses.mse,
+                  batch_size=BATCH_SIZE,
+                  epoch=EPOCHS)
+
+    model.fit(padded_train, train_labels, validation_data=(padded_test, test_labels))
 
 
 def define_sarcasm():
@@ -109,9 +123,10 @@ if __name__ == '__main__':
         data_rating = chunk["rating"]
         data_review = chunk["review_text"]
         padded_train, padded_test, train_labels, test_labels = tokenizer_func(data_rating, data_review)
-        sarcasm_prediction = sarcasm_model.predict(padded_train)
-        sarcasm_df = pd.DataFrame(sarcasm_prediction, columns=["predict"])
-        # TODO: this line can be use to take the predicted sarcasm score of a sentence.
-        # for temporarity in sarcasm_df["predict"]:
+        sarcasm_prediction_train = sarcasm_model.predict(padded_train)
+        sarcasm_prediction_test = sarcasm_model.predict(padded_test)
 
-        # temp = sarcasm_df.loc[2, "predict"]
+        padded_train = np.concatenate((padded_train, np.array(sarcasm_prediction_train.flatten())[:, None]), axis=1)
+        padded_test = np.concatenate((padded_test, np.array(sarcasm_prediction_test.flatten())[:, None]), axis=1)
+
+        # model_start(padded_train, padded_test, train_labels, test_labels)
