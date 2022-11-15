@@ -12,6 +12,8 @@ NUM_EPOCHS = 10
 EMBEDDING_DIM = 16
 EPOCHS = 250
 BATCH_SIZE = 512
+LOG_DIR = "tensorboard"
+OOV = 0
 
 
 # Just to test the setup
@@ -23,7 +25,7 @@ def setup():
 
 
 def tokenizer_func(data_rating, data_review):
-    tokenizer = Tokenizer(num_words=NUM_WORDS, oov_token="<OOV>")
+    tokenizer = Tokenizer(num_words=NUM_WORDS, oov_token=OOV)
     tokenizer.fit_on_texts(data_review)
 
     word_index = tokenizer.word_index
@@ -42,20 +44,41 @@ def tokenizer_func(data_rating, data_review):
     return np.array(padded_train), np.array(padded_test), np.array(train_labels), np.array(test_labels)
 
 
-def model_start(padded_train, padded_test, train_labels, test_labels):
-    model = tf.keras.Sequential()
+def model_start(padded_train, padded_test, train_labels, test_labels, model):
+    model.predict(padded_test)
+    model.summary()
+    model.fit(padded_train, train_labels,
+              batch_size=BATCH_SIZE,
+              callbacks=[tf.keras.callbacks.TensorBoard(LOG_DIR + "/TEST/")],
+              epochs=EPOCHS, validation_data=(padded_test, test_labels))
+
+    return model
+
+
+def set_model():
+    model = tf.keras.models.Sequential()
+
+    model.add(tf.keras.layers.Conv2D(8, (3, 3), activation=tf.keras.activations.tanh, padding='same'))
+    model.add(tf.keras.layers.Conv2D(8, (3, 3), activation=tf.keras.activations.tanh, padding='same'))
+    model.add(tf.keras.layers.MaxPool2D())
+
+    model.add(tf.keras.layers.Conv2D(16, (3, 3), activation=tf.keras.activations.tanh, padding='same'))
+    model.add(tf.keras.layers.Conv2D(16, (3, 3), activation=tf.keras.activations.tanh, padding='same'))
+    model.add(tf.keras.layers.MaxPool2D())
+
+    model.add(tf.keras.layers.Conv2D(32, (3, 3), activation=tf.keras.activations.tanh, padding='same'))
+    model.add(tf.keras.layers.Conv2D(32, (3, 3), activation=tf.keras.activations.tanh, padding='same'))
+    model.add(tf.keras.layers.MaxPool2D())
+
     model.add(tf.keras.layers.Flatten())
-    model.add(tf.keras.layers.Dense(42, activation=tf.keras.activations.tanh))
     model.add(tf.keras.layers.Dense(32, activation=tf.keras.activations.tanh))
     model.add(tf.keras.layers.Dense(16, activation=tf.keras.activations.tanh))
-    model.add(tf.keras.layers.Dense(10, activation=tf.keras.activations.sigmoid))
+    model.add(tf.keras.layers.Dense(10, activation=tf.keras.activations.softmax))
 
     model.compile(optimizer=tf.keras.optimizers.SGD(0.1, momentum=0.9),
-                  loss=tf.keras.losses.mse,
-                  batch_size=BATCH_SIZE,
-                  epoch=EPOCHS)
-
-    model.fit(padded_train, train_labels, validation_data=(padded_test, test_labels))
+                  loss=tf.keras.losses.categorical_crossentropy,
+                  metrics=[tf.keras.metrics.categorical_accuracy])
+    return model
 
 
 def define_sarcasm():
@@ -63,7 +86,6 @@ def define_sarcasm():
     # iterating through the json data and loading the requisite values into our python lists
     sentences = data['headline']
     labels = data['is_sarcastic']
-    urls = data['article_link']
     training_size = 20000
 
     training_sentences = sentences[0:training_size]
@@ -71,7 +93,7 @@ def define_sarcasm():
 
     training_labels = labels[0:training_size]
     testing_labels = labels[training_size:]
-    tokenizer = Tokenizer(num_words=NUM_WORDS, oov_token="<OOV>")
+    tokenizer = Tokenizer(num_words=NUM_WORDS, oov_token=OOV)
     # fitting tokenizer only to training set
     tokenizer.fit_on_texts(training_sentences)
 
@@ -118,6 +140,7 @@ def define_sarcasm():
 if __name__ == '__main__':
     setup()
     sarcasm_model = define_sarcasm()
+    model = set_model()
 
     for chunk in pd.read_csv('../kaggle/input/goodreads_train.csv', sep=',', header=0, chunksize=CHUNKSIZE):
         data_rating = chunk["rating"]
@@ -129,4 +152,4 @@ if __name__ == '__main__':
         padded_train = np.concatenate((padded_train, np.array(sarcasm_prediction_train.flatten())[:, None]), axis=1)
         padded_test = np.concatenate((padded_test, np.array(sarcasm_prediction_test.flatten())[:, None]), axis=1)
 
-        # model_start(padded_train, padded_test, train_labels, test_labels)
+        model = model_start(padded_train, padded_test, train_labels, test_labels, model)

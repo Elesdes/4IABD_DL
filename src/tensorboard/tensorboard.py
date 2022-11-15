@@ -29,3 +29,4 @@ def create_tensorboard_log_dir(type_of_algorithm: str = None,
 
 if __name__ == "__main__":
     create_tensorboard_log_dir("ML", "learning")
+    create_tensorboard_log_dir(momentum=1)
