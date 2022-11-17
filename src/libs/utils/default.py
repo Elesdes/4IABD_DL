@@ -1,26 +1,31 @@
 #
-class default_parameters:
-    "Get default values for max_size, num_words, chunk_size, iterations, embedding_dim, epochs or batch_size. Can be modified."
-    max_size = 100
-    num_words = 10000
-    chunk_size = 100000
+class DefaultParameters:
+    """Get default values for learning_rate, momentum, num_hidden_layers, num_neurons_per_hidden_layers,
+    iterations, epochs, batch_size
+    max_size, num_words, chunk_size, embedding_dim.
+    Can be modified."""
+    # These variables are about models used
+    learning_rate = 0.01
+    momentum = 0.01
+    num_hidden_layers = 1
+    num_neurons_per_hidden_layers = 1
+
+    # These variables are for training and testing purposes
     iterations = 10
-    embedding_dim = 16
     epochs = 250
     batch_size = 512
 
-    def __init__(self, function):
-        self.function = function
+    # These values are about data manipulation
+    max_size = 100
+    num_words = 10000
+    chunk_size = 100000
+    embedding_dim = 16
 
-    def __call__(self, *args, **kwargs):
-        return self.function(*args, **kwargs)
 
-
-@default_parameters
 def how_to_use() -> None:
-    print(default_parameters.max_size)
-    default_parameters.max_size = 12
-    print(default_parameters.max_size)
+    print(DefaultParameters.max_size)
+    DefaultParameters.max_size = 12
+    print(DefaultParameters.max_size)
 
 
 if __name__ == "__main__":

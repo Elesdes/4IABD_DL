@@ -1,2 +1,2 @@
-from .default import default_parameters
+from .default import DefaultParameters
 from .tensorboard import create_tensorboard_log_dir

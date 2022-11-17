@@ -1,5 +1,5 @@
 from src.libs.natural_language_processing.nlp import tokenizer_func
-from src.libs.utils.default import default_parameters
+from src.libs.utils.default import DefaultParameters
 
 import numpy as np
 import pandas as pd
@@ -17,7 +17,6 @@ def setup():
     print("GPU is", "available" if tf.config.list_physical_devices('GPU') else "NOT AVAILABLE")
 
 
-@default_parameters
 def define_sarcasm():
     data = pd.read_json('../kaggle/input/sarcasm.json', lines=True)
     # iterating through the json data and loading the requisite values into our python lists
@@ -31,7 +30,7 @@ def define_sarcasm():
 
     training_labels = labels[0:training_size]
     testing_labels = labels[training_size:]
-    tokenizer = Tokenizer(num_words=default_parameters.num_words, oov_token="<OOV>")
+    tokenizer = Tokenizer(num_words=DefaultParameters.num_words, oov_token="<OOV>")
     # fitting tokenizer only to training set
     tokenizer.fit_on_texts(training_sentences)
 
@@ -39,14 +38,14 @@ def define_sarcasm():
 
     # creating training sequences and padding them
     traning_sequences = tokenizer.texts_to_sequences(training_sentences)
-    training_padded = pad_sequences(traning_sequences, maxlen=default_parameters.max_size,
+    training_padded = pad_sequences(traning_sequences, maxlen=DefaultParameters.max_size,
                                     padding='post',
                                     truncating='post',
                                     )
 
     # creating  testing sequences and padding them using same tokenizer
     testing_sequences = tokenizer.texts_to_sequences(testing_sentences)
-    testing_padded = pad_sequences(testing_sequences, maxlen=default_parameters.max_size,
+    testing_padded = pad_sequences(testing_sequences, maxlen=DefaultParameters.max_size,
                                    padding='post',
                                    truncating='post',
                                    )
@@ -60,7 +59,8 @@ def define_sarcasm():
     # creating a model for sentiment analysis
     model = tf.keras.Sequential([
         # addinging an Embedding layer for Neural Network to learn the vectors
-        tf.keras.layers.Embedding(default_parameters.num_words, default_parameters.embedding_dim, input_length=default_parameters.max_size),
+        tf.keras.layers.Embedding(DefaultParameters.num_words, DefaultParameters.embedding_dim,
+                                  input_length=DefaultParameters.max_size),
         # Global Average pooling is similar to adding up vectors in this case
         tf.keras.layers.GlobalAveragePooling1D(),
         tf.keras.layers.Dense(24, activation='relu'),
@@ -69,7 +69,7 @@ def define_sarcasm():
 
     model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-    history = model.fit(training_padded, training_labels, epochs=default_parameters.epochs,
+    history = model.fit(training_padded, training_labels, epochs=DefaultParameters.epochs,
                         validation_data=(testing_padded, testing_labels))
 
     return model
@@ -79,7 +79,8 @@ if __name__ == '__main__':
     setup()
     sarcasm_model = define_sarcasm()
 
-    for chunk in pd.read_csv('../kaggle/input/goodreads_train.csv', sep=',', header=0, chunksize=default_parameters.chunk_size):
+    for chunk in pd.read_csv('../kaggle/input/goodreads_train.csv', sep=',', header=0,
+                             chunksize=DefaultParameters.chunk_size):
         data_rating = chunk["rating"]
         data_review = chunk["review_text"]
         padded_train, padded_test, train_labels, test_labels = tokenizer_func(data_rating, data_review)
@@ -90,3 +91,4 @@ if __name__ == '__main__':
         padded_test = np.concatenate((padded_test, np.array(sarcasm_prediction_test.flatten())[:, None]), axis=1)
 
         # model_start(padded_train, padded_test, train_labels, test_labels)
+
