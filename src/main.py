@@ -5,7 +5,7 @@ import tensorflow_hub as hub
 from keras.preprocessing.text import Tokenizer
 from keras_preprocessing.sequence import pad_sequences
 
-MAX_SIZE = 100
+MAX_SIZE = 99
 NUM_WORDS = 10000
 CHUNKSIZE = 100000
 NUM_EPOCHS = 10
@@ -58,22 +58,22 @@ def model_start(padded_train, padded_test, train_labels, test_labels, model):
 def set_model():
     model = tf.keras.models.Sequential()
 
-    model.add(tf.keras.layers.Conv2D(8, (3, 3), activation=tf.keras.activations.tanh, padding='same'))
-    model.add(tf.keras.layers.Conv2D(8, (3, 3), activation=tf.keras.activations.tanh, padding='same'))
+    model.add(tf.keras.layers.Conv2D(8, 100, activation=tf.keras.activations.tanh, padding='same'))
+    model.add(tf.keras.layers.Conv2D(8, 100, activation=tf.keras.activations.tanh, padding='same'))
     model.add(tf.keras.layers.MaxPool2D())
 
-    model.add(tf.keras.layers.Conv2D(16, (3, 3), activation=tf.keras.activations.tanh, padding='same'))
-    model.add(tf.keras.layers.Conv2D(16, (3, 3), activation=tf.keras.activations.tanh, padding='same'))
+    model.add(tf.keras.layers.Conv2D(16, 100, activation=tf.keras.activations.tanh, padding='same'))
+    model.add(tf.keras.layers.Conv2D(16, 100, activation=tf.keras.activations.tanh, padding='same'))
     model.add(tf.keras.layers.MaxPool2D())
 
-    model.add(tf.keras.layers.Conv2D(32, (3, 3), activation=tf.keras.activations.tanh, padding='same'))
-    model.add(tf.keras.layers.Conv2D(32, (3, 3), activation=tf.keras.activations.tanh, padding='same'))
+    model.add(tf.keras.layers.Conv2D(32, 100, activation=tf.keras.activations.tanh, padding='same'))
+    model.add(tf.keras.layers.Conv2D(32, 100, activation=tf.keras.activations.tanh, padding='same'))
     model.add(tf.keras.layers.MaxPool2D())
 
     model.add(tf.keras.layers.Flatten())
     model.add(tf.keras.layers.Dense(32, activation=tf.keras.activations.tanh))
     model.add(tf.keras.layers.Dense(16, activation=tf.keras.activations.tanh))
-    model.add(tf.keras.layers.Dense(10, activation=tf.keras.activations.softmax))
+    model.add(tf.keras.layers.Dense(1, activation=tf.keras.activations.softmax)) # model.add(tf.keras.layers.Dense(10, activation=tf.keras.activations.softmax))
 
     model.compile(optimizer=tf.keras.optimizers.SGD(0.1, momentum=0.9),
                   loss=tf.keras.losses.categorical_crossentropy,
@@ -152,4 +152,12 @@ if __name__ == '__main__':
         padded_train = np.concatenate((padded_train, np.array(sarcasm_prediction_train.flatten())[:, None]), axis=1)
         padded_test = np.concatenate((padded_test, np.array(sarcasm_prediction_test.flatten())[:, None]), axis=1)
 
+        padded_train = np.reshape(padded_train, (50000, 10, 10))
+        padded_test = np.reshape(padded_test, (50000, 10, 10))
+        padded_train = np.expand_dims(padded_train, -1)
+        padded_test = np.expand_dims(padded_test, -1)
+        print(padded_train.ndim)
+        print(padded_test.ndim)
+        print(padded_train.shape)
+        print(padded_test.shape)
         model = model_start(padded_train, padded_test, train_labels, test_labels, model)
