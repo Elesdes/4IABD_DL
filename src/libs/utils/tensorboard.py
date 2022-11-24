@@ -41,9 +41,10 @@ def create_tensorboard_log_dir(type_of_algorithm: str = "Test",
 
 
 @create_tensorboard_log_dir(type_of_algorithm="how_to_use")
-def how_to_use(path: str = None) -> None:
+def how_to_use(test, path: str = None) -> None:
     print(f"Path created at : {path}")
 
 
 if __name__ == "__main__":
-    how_to_use()
+    how_to_use(test="ok")
+
