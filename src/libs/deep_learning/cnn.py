@@ -1,11 +1,8 @@
 from typing import Any
 
-from src.libs.utils import setup_variables
-
 import tensorflow as tf
 
 
-@setup_variables
 def model_start(padded_train: Any = None, padded_test: Any = None,
                 train_labels: Any = None, test_labels: Any = None,
                 batch_size: int = None, epochs: int = None) -> None:

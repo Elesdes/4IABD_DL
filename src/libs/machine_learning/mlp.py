@@ -2,7 +2,7 @@ from typing import Any
 
 from src.libs.natural_language_processing.nlp import tokenizer_func
 from src.libs.utils.default import DefaultParameters
-from src.libs.utils.tensorboard import create_tensorboard_log_dir
+from src.libs.utils.tf_utils import create_tensorboard_log_dir
 
 from tqdm import tqdm
 import numpy as np
