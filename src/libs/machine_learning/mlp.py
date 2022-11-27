@@ -34,8 +34,8 @@ def mlp(x_train, y_train, path: str = None) -> Any:
 
 
 if __name__ == "__main__":
-    train_df = pd.read_csv('../../../kaggle/input/goodreads_train.csv')
-    test_df = pd.read_csv('../../../kaggle/input/goodreads_test.csv')
+    train_df = pd.read_csv('../../../kaggle/input/goodreads-books-reviews-290312/goodreads_train.csv')
+    test_df = pd.read_csv('../../../kaggle/input/goodreads-books-reviews-290312/goodreads_test.csv')
     input_dfs = [train_df, test_df]
     datasets = ["train_ds", "test_ds"]
 

@@ -95,7 +95,7 @@ def set_model():
 
 
 def define_sarcasm():
-    data = pd.read_json('../kaggle/input/sarcasm.json', lines=True)
+    data = pd.read_json('../kaggle/input/sarcasmjson/sarcasm.json', lines=True)
     # iterating through the json data and loading the requisite values into our python lists
     sentences = data['headline']
     labels = data['is_sarcastic']
@@ -154,7 +154,7 @@ if __name__ == '__main__':
     sarcasm_model = define_sarcasm()
     model = set_model()
 
-    for chunk in pd.read_csv('../kaggle/input/goodreads_train.csv', sep=',', header=0, chunksize=CHUNKSIZE):
+    for chunk in pd.read_csv('../kaggle/input/goodreads-books-reviews-290312/goodreads_train.csv', sep=',', header=0, chunksize=CHUNKSIZE):
         data_rating = chunk["rating"]
         data_review = chunk["review_text"]
         padded_train, padded_test, train_labels, test_labels = tokenizer_func(data_rating, data_review)
