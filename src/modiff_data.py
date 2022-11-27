@@ -26,7 +26,7 @@ def dataframe_creation(df=None, with_reading_time_NaN=None, with_reading_time=No
 
     df[['0', '1', '2', '3', 'localisation', '5']] = df.date_updated.str.split(" ", expand=True, )
     df = df.drop(
-        ['0', '1', '2', '3', '5' , 'review_text', 'date_added', "book_id", 'read_at', 'started_at', 'date_updated', 'user_id',
+        ['0', '1', '2', '3', '5' , 'date_added', "book_id", 'read_at', 'started_at', 'date_updated', 'user_id',
          'date_added', 'date_updated', 'n_votes', 'n_comments'], axis=1)
 
     return df
