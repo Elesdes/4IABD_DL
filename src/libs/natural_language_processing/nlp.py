@@ -1,12 +1,16 @@
 from typing import Any
 
+from src.libs.utils.default import DefaultParameters
+
 import numpy as np
 from keras.preprocessing.text import Tokenizer
 from keras_preprocessing.sequence import pad_sequences
+from pandas import DataFrame
 
 
-def tokenizer_func(data_rating: Any = None, data_review: Any = None,
-                   nb_words: int = None, max_size: int = None):
+def tokenizer_func(data_rating: DataFrame = None, data_review: DataFrame = None,
+                   nb_words: int = DefaultParameters.num_words, max_size: int = DefaultParameters.max_size) \
+        -> tuple[np.array, np.array, np.array, np.array]:
     tokenizer = Tokenizer(num_words=nb_words, oov_token="<OOV>")
     tokenizer.fit_on_texts(data_review)
 
