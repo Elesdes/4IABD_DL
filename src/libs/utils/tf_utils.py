@@ -27,9 +27,9 @@ def create_tensorboard_log_dir(type_of_algorithm: str = "Test",
                                       f"_nphl_{DefaultParameters.num_neurons_per_hidden_layers}"
 
                 dirs = [f"{base_dir_logs}",
-                         f"{base_dir_logs}/{type_of_algorithm}",
-                         f"{base_dir_logs}/{type_of_algorithm}/{algorithm_used}",
-                         f"{base_dir_logs}/{type_of_algorithm}/{algorithm_used}/{experiment_dir_logs}"]
+                        f"{base_dir_logs}/{type_of_algorithm}",
+                        f"{base_dir_logs}/{type_of_algorithm}/{algorithm_used}",
+                        f"{base_dir_logs}/{type_of_algorithm}/{algorithm_used}/{experiment_dir_logs}"]
 
                 # Creating every dirs that doesn't exist yet
                 for dir in dirs:
@@ -44,10 +44,9 @@ def create_tensorboard_log_dir(type_of_algorithm: str = "Test",
 
 
 @create_tensorboard_log_dir(type_of_algorithm="how_to_use")
-def how_to_use(test, path: str = None) -> None:
+def how_to_use(test: str = None, path: str = None) -> None:
     print(f"Path created at : {path}")
 
 
 if __name__ == "__main__":
     how_to_use(test="ok")
-
