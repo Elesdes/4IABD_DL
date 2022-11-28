@@ -5,7 +5,7 @@ import sys
 from distutils.util import strtobool
 
 KAGGLE_DIR_NAME = "notebook-deep-learning"
-KAGGLE_DIR_SUBMISSION = "kaggle/working/submission.csv"
+KAGGLE_DIR_SUBMISSION = "/kaggle/working/submission.csv"
 KAGGLE_COMPETITION_NAME = "goodreads-books-reviews-290312"
 KAGGLE_MESSAGE = "Submission"
 
