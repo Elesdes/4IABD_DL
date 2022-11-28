@@ -14,8 +14,6 @@ def tokenizer_func(data_rating: DataFrame = None, data_review: DataFrame = None,
     tokenizer = Tokenizer(num_words=nb_words, oov_token="<OOV>")
     tokenizer.fit_on_texts(data_review)
 
-    word_index = tokenizer.word_index
-
     train_labels = data_rating.iloc[:int(len(data_rating) / 2)]
     train_examples = data_review.iloc[int(len(data_review) / 2):]
     test_examples = data_review.iloc[:int(len(data_review) / 2)]
