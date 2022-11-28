@@ -7,6 +7,8 @@ import tempfile
 from distutils.util import strtobool
 
 KAGGLE_DIR_NAME = "notebook-deep-learning"
+KAGGLE_DIR_SUBMISSION = "kaggle/working/submission.csv"
+KAGGLE_COMPETITION_NAME = "goodreads-books-reviews-290312"
 
 
 def read_json(path):
@@ -120,6 +122,7 @@ def main():
     # Push the kernel to Kaggle.
     run_shell(f"kaggle kernels push")
     run_shell(f'kaggle kernels status {KAGGLE_DIR_NAME}')
+    run_shell(f'kaggle competitions submit -c {KAGGLE_COMPETITION_NAME} -f {KAGGLE_DIR_SUBMISSION}')
 
 
 if __name__ == "__main__":
