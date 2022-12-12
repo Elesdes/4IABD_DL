@@ -7,15 +7,13 @@ import tensorflow_hub as hub
 from keras.preprocessing.text import Tokenizer
 from keras_preprocessing.sequence import pad_sequences
 
-MAX_SIZE = 783 # 783
-NUM_WORDS = 7500
+MAX_SIZE = 400 # 783
+NUM_WORDS = 254 # 7500
 CHUNKSIZE = 10000
-EMBEDDING_DIM = 16
-EPOCHS = 10
-BATCH_SIZE = 256
+EPOCHS = 25
+BATCH_SIZE = 1024
 LOG_DIR = "src/tensorboard"
 OOV = 0
-SARCASM_TRAINING_SIZE = 20000
 
 
 # Just to test the setup
@@ -48,8 +46,8 @@ def tokenizer_func(data_rating, data_review):
 
 
 def model_start(padded_train, padded_test, train_labels, test_labels, model):
-    padded_train = padded_train / NUM_WORDS - 1
-    padded_test = padded_test / NUM_WORDS - 1
+    padded_train = padded_train / NUM_WORDS
+    padded_test = padded_test / NUM_WORDS
 
     train_labels = tf.keras.utils.to_categorical(train_labels, 6)
     test_labels = tf.keras.utils.to_categorical(test_labels, 6)
@@ -57,10 +55,12 @@ def model_start(padded_train, padded_test, train_labels, test_labels, model):
     padded_train = np.expand_dims(padded_train, -1)
     padded_test = np.expand_dims(padded_test, -1)
 
-    model.predict(padded_train)
-    model.fit(padded_train, train_labels,
-                        batch_size=BATCH_SIZE,
-                        epochs=EPOCHS, validation_data=(padded_test, test_labels))
+    model.fit(
+        padded_train,  # .values.astype(np.float32)
+        train_labels,
+        validation_split=0.2,
+        verbose=1, epochs=25)
+    # model.fit(padded_train, train_labels, epochs=EPOCHS, validation_data=(padded_test, test_labels))
 
     # callbacks=[tf.keras.callbacks.TensorBoard(LOG_DIR + "/TEST/")],
     return model
@@ -93,7 +93,7 @@ def set_model():
     model.add(tf.keras.layers.Dense(6,
                                     activation=tf.keras.activations.softmax))  # model.add(tf.keras.layers.Dense(1, activation=tf.keras.activations.softmax))
 
-    model.compile(optimizer=tf.keras.optimizers.SGD(0.1, momentum=0.9),
+    model.compile(optimizer=tf.keras.optimizers.SGD(0.0001, momentum=0.0009),
                   loss=tf.keras.losses.categorical_crossentropy,
                   metrics=[tf.keras.metrics.categorical_accuracy])
     return model
@@ -105,32 +105,22 @@ def get_dataset():
                                                  select_columns=[3, 4],
                                                  label_name='rating',
                                                  shuffle=False,
-                                                 num_epochs=1,
                                                  ignore_errors=True)
 
 
 if __name__ == '__main__':
     setup()
-    sarcasm_model = tf.keras.models.load_model('../algorithms/Sarcasm')
+    # sarcasm_model = tf.keras.models.load_model('../algorithms/Sarcasm')
     model = set_model()
-    """
-    data_train_tf = tf.data.experimental.make_csv_dataset(
-    "../../kaggle/input/goodreads_train.csv",
-    batch_size = CHUNKSIZE,
-    label_name = 'rating',
-    select_columns=[3, 4],
-    num_epochs = 1,
-    ignore_errors = True)
-    """
     for batch, label in get_dataset().take(-1):
         for key, value in batch.items():
             # print(f"{key:10s}: {value}")
             padded_train, padded_test, train_labels, test_labels = tokenizer_func(np.array(label).astype('str'), np.array(value).astype('str'))
-            sarcasm_prediction_train = sarcasm_model.predict(padded_train)
-            sarcasm_prediction_test = sarcasm_model.predict(padded_test)
+            # sarcasm_prediction_train = sarcasm_model.predict(padded_train)
+            # sarcasm_prediction_test = sarcasm_model.predict(padded_test)
 
-            padded_train = np.concatenate((padded_train, np.array(sarcasm_prediction_train.flatten())[:, None]), axis=1)
-            padded_test = np.concatenate((padded_test, np.array(sarcasm_prediction_test.flatten())[:, None]), axis=1)
+            # padded_train = np.concatenate((padded_train, np.array(sarcasm_prediction_train.flatten())[:, None]), axis=1)
+            # padded_test = np.concatenate((padded_test, np.array(sarcasm_prediction_test.flatten())[:, None]), axis=1)
             padded_train = np.reshape(padded_train, (1 - math.floor(int(len(label) / 8)), int(math.sqrt(MAX_SIZE + 1)), int(math.sqrt(MAX_SIZE + 1))))
             padded_test = np.reshape(padded_test, (math.floor(int(len(label) / 8)), int(math.sqrt(MAX_SIZE + 1)), int(math.sqrt(MAX_SIZE + 1))))
             model = model_start(padded_train, padded_test, train_labels, test_labels, model)
