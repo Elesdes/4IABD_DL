@@ -11,6 +11,7 @@ from keras_preprocessing.sequence import pad_sequences
 MAX_SIZE = 784
 NUM_WORDS = 20000
 BATCH_SIZE = 100000
+STEPS_PER_EPOCH = math.ceil(900000 / BATCH_SIZE)
 EPOCHS = 20
 EMBEDDING_DIMS = 16
 LOG_DIR = "tensorboard"
@@ -82,15 +83,13 @@ def set_model(model):
 
 def model_start(value, label, model, last_epochs):
     train_labels = tf.keras.utils.to_categorical(label, 6)
-
-    print(model.summary())
-
     model.fit(
         value,
         train_labels,
-        callbacks=[tf.keras.callbacks.TensorBoard(LOG_DIR + "/preprocessing_test_20_take/")],
-        initial_epoch=last_epochs,
-        epochs=EPOCHS + last_epochs,
+        callbacks=[tf.keras.callbacks.TensorBoard(LOG_DIR + "/preprocessing_test_20_take_100000_batchsize_steps_per_epoch_on/")],
+        # initial_epoch=last_epochs,
+        steps_per_epoch=STEPS_PER_EPOCH,
+        epochs=EPOCHS, # + last_epochs,
         validation_split=0.2,
         verbose=1)
 
@@ -106,9 +105,9 @@ if __name__ == '__main__':
             model = get_preprocessing_model(value)
 
     model = set_model(model)
-    for batch, label in data_batch.take(20):
+    for batch, label in data_batch.take(1):
         for key, value in batch.items():
             model = model_start(value, label, model, last_epochs)
             last_epochs += EPOCHS
 
-    model.save("../algorithms/DL/20_take")
+    model.save("algorithms/DL/20_take")
