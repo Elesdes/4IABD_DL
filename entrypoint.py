@@ -121,7 +121,7 @@ def main():
     # Push the kernel to Kaggle.
     run_shell(f"kaggle kernels push")
     run_shell(f'kaggle kernels status {KAGGLE_DIR_NAME}')
-    run_shell(f'kaggle competitions submit -c {KAGGLE_COMPETITION_NAME} -f {KAGGLE_DIR_SUBMISSION} -m {KAGGLE_MESSAGE}')
+    #run_shell(f'kaggle competitions submit -c {KAGGLE_COMPETITION_NAME} -f {KAGGLE_DIR_SUBMISSION} -m {KAGGLE_MESSAGE}')
 
 
 if __name__ == "__main__":
