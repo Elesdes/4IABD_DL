@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import date
 from functools import wraps
 
@@ -16,7 +17,8 @@ def create_tensorboard_log_dir(type_of_algorithm: str = "Test",
         def wrapper(path: str = None, *args):
             if path is None:
                 # Relative path from this file to tensorboard log directory
-                base_dir_logs = "../../../tensorboard_logs"
+                base_dir_logs = os.path.dirname(os.path.realpath("__file__"))
+                print(base_dir_logs)
 
                 # Create a path file name with date and other variables
                 experiment_dir_logs = f"{date.today().strftime('%d%m%Y')}" \
@@ -44,9 +46,9 @@ def create_tensorboard_log_dir(type_of_algorithm: str = "Test",
 
 
 @create_tensorboard_log_dir(type_of_algorithm="how_to_use")
-def how_to_use(test: str = None, path: str = None) -> None:
+def how_to_use(path: str = None) -> None:
     print(f"Path created at : {path}")
 
 
 if __name__ == "__main__":
-    how_to_use(test="ok")
+    how_to_use()

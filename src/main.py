@@ -1,5 +1,7 @@
 import math
 
+from src.libs.utils.tf_utils import create_tensorboard_log_dir
+
 import numpy as np
 import pandas as pd
 import tensorflow as tf
@@ -149,8 +151,15 @@ def define_sarcasm():
     return model
 
 
+@create_tensorboard_log_dir(type_of_algorithm="ML",
+                            algorithm_used="MLP")
+def test():
+    pass
+
+
 if __name__ == '__main__':
-    setup()
+    test()
+    """setup()
     sarcasm_model = define_sarcasm()
     model = set_model()
 
@@ -166,4 +175,4 @@ if __name__ == '__main__':
 
         padded_train = np.reshape(padded_train, (1 - math.floor(int(len(data_rating) / 8)), 28, 28))
         padded_test = np.reshape(padded_test, (math.floor(int(len(data_rating) / 8)), 28, 28))
-        model = model_start(padded_train, padded_test, train_labels, test_labels, model)
+        model = model_start(padded_train, padded_test, train_labels, test_labels, model)"""
